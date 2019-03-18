@@ -44,12 +44,12 @@ func (c *LibFMClient) LoadModel(filename string) error {
 	var cmsg *C.char = C.CString(filename)
 	defer C.free(unsafe.Pointer(cmsg))
 	model_tmp := initModel()
-	if ok := int(C.call_loadModel(model_tmp, cmsg)); ok != 1 {
+	if ok := int(C.call_loadModel(model_tmp.cModel, cmsg)); ok != 1 {
 		err := errors.New(fmt.Sprintf("Can't load model from %v", filename))
 		errors_.CheckErrSendEmail(err)
 		return err
 	} else {
-		c.FMModel.cModel = model_tmp
+		c.FMModel.cModel = model_tmp.cModel
 		c.ModelPath = filename
 	}
 	return nil
