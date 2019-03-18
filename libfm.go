@@ -22,7 +22,7 @@ type LibFMClient struct {
 	FMModel   *Model
 }
 
-type LibLROptions struct {
+type LibFMOptions struct {
 	Model_path string // 模型路径
 }
 
@@ -40,39 +40,30 @@ func (c *LibFMClient) Predict(data []string) []float64 {
 	return p
 }
 
-func (c *LibFMClient) LoadModel(filename string) {
-	var cmsg *C.char = C.CString(filename)
+func (c *LibFMClient) LoadModel() error {
+	var cmsg *C.char = C.CString(c.ModelPath)
 	defer C.free(unsafe.Pointer(cmsg))
 	if ok := int(C.call_loadModel(c.FMModel.cModel, cmsg)); ok != 1 {
-		errors_.CheckErrSendEmail(errors.New(fmt.Sprintf("Can't load model from %v", filename)))
-	}
-}
-
-func (c *LibFMClient) InitModel(filename string) error {
-	model := C.call_create()
-	m := &Model{
-		cModel: model,
-	}
-	m.cModel.LoadModel(filename)
-	if model == nil {
-		return errors.New(fmt.Sprintf("Can't load model from %v", filename))
+		err := errors.New(fmt.Sprintf("Can't load model from %v", c.ModelPath))
+		errors_.CheckErrSendEmail(err)
+		return err
 	}
 	return nil
 }
 
-func (c *LibFMClient) init() {
-	// 模型初始化
-	errors_.CheckFatalErr(c.InitModel(c.ModelPath))
+func initModel() *Model {
+	return &Model{
+		cModel: C.call_create(),
+	}
 }
 
-func NewLibFMClient(opt *LibLROptions) (*LibFMClient, error) {
+func NewLibFMClient(opt *LibFMOptions) (*LibFMClient, error) {
 	c := &LibFMClient{
 		ModelPath: opt.Model_path,
-		FMModel:   new(Model),
+		FMModel:   initModel(),
 	}
-	c.init()
-	if c.FMModel == nil {
-		errors_.CheckFatalErr(fmt.Errorf("Can't load model from %v", c.ModelPath))
+	if err := c.LoadModel(); err == nil {
+		errors_.CheckFatalErr(fmt.Errorf("Can't init fm model from %v", c.ModelPath))
 	}
 	return c, nil
 }
