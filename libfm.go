@@ -1,4 +1,4 @@
-package main
+package libfm
 
 /*
 #cgo CFLAGS: -I./
