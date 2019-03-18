@@ -40,13 +40,17 @@ func (c *LibFMClient) Predict(data []string) []float64 {
 	return p
 }
 
-func (c *LibFMClient) LoadModel() error {
-	var cmsg *C.char = C.CString(c.ModelPath)
+func (c *LibFMClient) LoadModel(filename string) error {
+	var cmsg *C.char = C.CString(filename)
 	defer C.free(unsafe.Pointer(cmsg))
-	if ok := int(C.call_loadModel(c.FMModel.cModel, cmsg)); ok != 1 {
-		err := errors.New(fmt.Sprintf("Can't load model from %v", c.ModelPath))
+	model_tmp := initModel()
+	if ok := int(C.call_loadModel(model_tmp, cmsg)); ok != 1 {
+		err := errors.New(fmt.Sprintf("Can't load model from %v", filename))
 		errors_.CheckErrSendEmail(err)
 		return err
+	} else {
+		c.FMModel.cModel = model_tmp
+		c.ModelPath = filename
 	}
 	return nil
 }
@@ -62,7 +66,7 @@ func NewLibFMClient(opt *LibFMOptions) (*LibFMClient, error) {
 		ModelPath: opt.Model_path,
 		FMModel:   initModel(),
 	}
-	if err := c.LoadModel(); err == nil {
+	if err := c.LoadModel(c.ModelPath); err == nil {
 		errors_.CheckFatalErr(fmt.Errorf("Can't init fm model from %v", c.ModelPath))
 	}
 	return c, nil
