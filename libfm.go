@@ -66,7 +66,7 @@ func NewLibFMClient(opt *LibFMOptions) (*LibFMClient, error) {
 		ModelPath: opt.Model_path,
 		FMModel:   initModel(),
 	}
-	if err := c.LoadModel(c.ModelPath); err == nil {
+	if err := c.LoadModel(c.ModelPath); err != nil {
 		return nil, fmt.Errorf("Can't init fm model from %v", c.ModelPath)
 	}
 	return c, nil
