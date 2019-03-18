@@ -9,9 +9,9 @@ extern "C" {
 
 extern struct tag_fm_model *call_create();
 
-extern int call_loadModel(struct tag_fm_model* fm, char* model_file_path);
+extern int call_fm_loadModel(struct tag_fm_model* fm, char* model_file_path);
 
-extern double call_predict(struct tag_fm_model* fm, const char* data);
+extern double call_fm_predict(struct tag_fm_model* fm, const char* data);
 
 
 #ifdef __cplusplus

@@ -35,7 +35,7 @@ func (c *LibFMClient) Predict(data []string) []float64 {
 	for _, s := range data {
 		var cmsg *C.char = C.CString(s)
 		defer C.free(unsafe.Pointer(cmsg))
-		p = append(p, float64(C.call_predict(c.FMModel.cModel, cmsg)))
+		p = append(p, float64(C.call_fm_predict(c.FMModel.cModel, cmsg)))
 	}
 	return p
 }
@@ -44,7 +44,7 @@ func (c *LibFMClient) LoadModel(filename string) error {
 	var cmsg *C.char = C.CString(filename)
 	defer C.free(unsafe.Pointer(cmsg))
 	model_tmp := initModel()
-	if ok := int(C.call_loadModel(model_tmp.cModel, cmsg)); ok != 1 {
+	if ok := int(C.call_fm_loadModel(model_tmp.cModel, cmsg)); ok != 1 {
 		err := errors.New(fmt.Sprintf("Can't load model from %v", filename))
 		errors_.CheckErrSendEmail(err)
 		return err
